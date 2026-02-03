@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Kuis IPAS HOTS Kelas 4</title>
+
+<style>
+body{
+font-family:'Segoe UI',Arial;
+background:linear-gradient(135deg,#e0f2fe,#ede9fe);
+margin:0;overflow:hidden
+}
+.container{max-width:1100px;margin:auto;padding:25px;position:relative}
+.header{display:flex;justify-content:space-between;font-size:22px;font-weight:bold}
+.question{font-size:24px;margin:25px 0;line-height:1.5}
+
+.options{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:25px
+}
+.option{
+height:150px;
+border-radius:25px;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+font-size:20px;
+font-weight:bold;
+color:white;
+cursor:pointer;
+padding:18px;
+box-shadow:0 10px 18px rgba(0,0,0,0.25);
+transition:0.3s
+}
+.option:hover{transform:scale(1.05)}
+.a{background:linear-gradient(135deg,#2ecc71,#27ae60)}
+.b{background:linear-gradient(135deg,#9b5de5,#5f27cd)}
+.c{background:linear-gradient(135deg,#4361ee,#3a0ca3)}
+.d{background:linear-gradient(135deg,#ff9f1c,#ff7a18)}
+.correct{background:linear-gradient(135deg,#2ecc71,#1e8449)!important}
+.wrong{background:linear-gradient(135deg,#e74c3c,#c0392b)!important}
+
+.footer{margin-top:30px;display:flex;justify-content:space-between;align-items:center;font-size:18px}
+button{
+padding:12px 25px;border:none;border-radius:15px;
+background:#4361ee;color:white;font-size:18px;cursor:pointer
+}
+button:hover{background:#3a0ca3}
+
+.coin{
+position:absolute;
+top:-60px;
+font-size:42px;
+animation:fall 1s linear forwards
+}
+@keyframes fall{to{top:100vh}}
+</style>
+</head>
+
+<body>
+
+<audio id="benar">
+<source src="benar.mp3">
+</audio>
+<audio id="salah">
+<source src="salah.mp3">
+</audio>
+
+<div class="container">
+<div class="header">
+<div>⏱️ <span id="time">30</span></div>
+<div>Skor: <span id="score">0</span></div>
+</div>
+
+<div class="question" id="question"></div>
+
+<div class="options">
+<div class="option a" id="o0" onclick="jawab(0)"></div>
+<div class="option b" id="o1" onclick="jawab(1)"></div>
+<div class="option c" id="o2" onclick="jawab(2)"></div>
+<div class="option d" id="o3" onclick="jawab(3)"></div>
+</div>
+
+<div class="footer">
+<button onclick="prev()">◀</button>
+<div id="progress"></div>
+<button onclick="next()">▶</button>
+</div>
+</div>
+
+<script>
+const questions = [
+{q:"Halaman rumah sering banjir setelah hujan. Solusi paling efektif agar air meresap adalah …",
+o:["Menyemen halaman","Membuat lubang biopori","Menutup tanah dengan plastik","Meninggikan lantai"],a:1},
+
+{q:"Lampu dibiarkan menyala di siang hari. Dampak kebiasaan tersebut adalah …",
+o:["Energi lebih hemat","Tagihan listrik meningkat","Lampu lebih awet","Rumah lebih sejuk"],a:1},
+
+{q:"Pohon di sekitar sekolah ditebang habis. Akibat jangka panjang yang mungkin terjadi adalah …",
+o:["Udara semakin bersih","Tanah mudah longsor","Air tanah bertambah","Hewan semakin banyak"],a:1},
+
+{q:"Ibu menjemur pakaian basah hingga kering. Peristiwa ini menunjukkan perubahan wujud …",
+o:["Mencair","Membeku","Menguap","Mengembun"],a:2},
+
+{q:"Kipas angin menyala dan baling-balingnya berputar. Terjadi perubahan energi …",
+o:["Gerak → listrik","Listrik → gerak","Panas → listrik","Cahaya → gerak"],a:1},
+
+{q:"Sungai tercemar sampah menyebabkan ikan mati. Penyebab utamanya adalah …",
+o:["Air terlalu dingin","Kekurangan oksigen","Arus terlalu deras","Cahaya berkurang"],a:1},
+
+{q:"Jika semua orang menggunakan air tanpa hemat, dampak yang paling mungkin adalah …",
+o:["Hujan makin sering","Air tanah berkurang","Sungai semakin lebar","Air laut bertambah"],a:1},
+
+{q:"Menanam pohon di halaman rumah bermanfaat karena …",
+o:["Menghabiskan air tanah","Menyerap air hujan","Menghalangi udara","Membuat tanah kering"],a:1},
+
+{q:"Perubahan siang dan malam memengaruhi kegiatan manusia. Contohnya adalah …",
+o:["Tidur sepanjang hari","Belajar tengah malam","Bekerja saat siang","Tidak perlu istirahat"],a:2},
+
+{q:"Jika hujan terus turun dan tanah tidak dapat menyerap air, maka akan terjadi …",
+o:["Gempa","Banjir","Angin","Kabut"],a:1},
+
+{q:"Energi pada makanan digunakan manusia untuk …",
+o:["Berpindah tempat","Bernapas","Beraktivitas","Semua benar"],a:3},
+
+{q:"Hewan yang hidup di dua alam memerlukan air dan darat karena …",
+o:["Untuk berburu","Untuk berkembang biak","Untuk bernapas","Untuk bersembunyi"],a:1},
+
+{q:"Udara terasa panas saat siang hari karena …",
+o:["Bumi mendekat matahari","Matahari memancarkan panas","Angin berhenti","Awan menghilang"],a:1},
+
+{q:"Bunyi tidak terdengar di luar angkasa karena …",
+o:["Tidak ada cahaya","Tidak ada udara","Tidak ada panas","Tidak ada getaran"],a:1},
+
+{q:"Contoh perubahan energi listrik menjadi panas terjadi pada …",
+o:["Kipas","Lampu","Setrika","Radio"],a:2},
+
+{q:"Jika semua sampah dibuang ke sungai, dampaknya adalah …",
+o:["Air semakin bersih","Ikan bertambah","Aliran tersumbat","Air jernih"],a:2},
+
+{q:"Tumbuhan layu jika tidak disiram karena …",
+o:["Kekurangan air","Kekurangan cahaya","Kekurangan udara","Kekurangan tanah"],a:0},
+
+{q:"Fungsi daun bagi tumbuhan adalah …",
+o:["Menyerap air","Membuat makanan","Menopang batang","Melindungi akar"],a:1},
+
+{q:"Perubahan wujud air menjadi es disebut …",
+o:["Mencair","Membeku","Menguap","Mengembun"],a:1},
+
+{q:"Panas matahari bermanfaat bagi manusia untuk …",
+o:["Memasak","Menjemur","Menerangi","Semua benar"],a:3},
+
+{q:"Alat yang digunakan untuk mengukur waktu adalah …",
+o:["Penggaris","Jam","Termometer","Timbangan"],a:1},
+
+{q:"Gaya gravitasi menyebabkan benda …",
+o:["Mengapung","Melayang","Jatuh ke bawah","Berputar"],a:2},
+
+{q:"Air hujan berasal dari proses …",
+o:["Penguapan","Peresapan","Pembekuan","Pelapukan"],a:0},
+
+{q:"Menghemat listrik berarti ikut menjaga …",
+o:["Lingkungan","Hutan","Hewan","Laut"],a:0},
+
+{q:"Contoh sumber energi terbarukan adalah …",
+o:["Minyak bumi","Gas alam","Matahari","Batu bara"],a:2},
+
+{q:"Udara bersih penting bagi manusia karena …",
+o:["Membuat panas","Untuk bernapas","Menghasilkan air","Menyuburkan tanah"],a:1},
+
+{q:"Akar tumbuhan membantu mencegah banjir dengan cara …",
+o:["Menutup tanah","Menyerap air","Mengalirkan air","Menyimpan udara"],a:1},
+
+{q:"Perubahan bentuk benda tanpa zat baru disebut perubahan …",
+o:["Kimia","Fisika","Biologi","Alami"],a:1},
+
+{q:"Jika tidak ada matahari, maka …",
+o:["Tidak ada angin","Tidak ada kehidupan","Tidak ada hujan","Tidak ada udara"],a:1},
+
+{q:"Hujan deras terus-menerus dapat menyebabkan …",
+o:["Kekeringan","Banjir","Kabut","Angin"],a:1},
+
+{q:"Energi angin dimanfaatkan untuk …",
+o:["Menghasilkan listrik","Menyiram tanaman","Membuat panas","Membekukan air"],a:0},
+
+{q:"Menjaga kebersihan lingkungan berarti …",
+o:["Merusak alam","Melestarikan alam","Mengubah alam","Menghabiskan alam"],a:1},
+
+{q:"Sungai bersih menandakan lingkungan …",
+o:["Tercemar","Sehat","Rusak","Berbahaya"],a:1},
+
+{q:"Alat pernapasan ikan adalah …",
+o:["Paru-paru","Insang","Kulit","Trakea"],a:1},
+
+{q:"Jika pohon ditebang tanpa ditanam kembali, maka …",
+o:["Lingkungan lestari","Tanah subur","Kerusakan lingkungan","Air bertambah"],a:2},
+
+{q:"Contoh perilaku hemat energi di rumah adalah …",
+o:["Menyalakan TV terus","Mematikan lampu saat siang","Menyalakan AC","Menyalakan semua alat"],a:1},
+
+{q:"Energi cahaya diubah tumbuhan menjadi makanan melalui …",
+o:["Respirasi","Fotosintesis","Fermentasi","Transpirasi"],a:1},
+
+{q:"Air sangat penting bagi makhluk hidup karena …",
+o:["Sebagai hiasan","Untuk minum dan hidup","Untuk bermain","Untuk mengalir"],a:1},
+
+{q:"Jika udara tercemar, dampaknya bagi manusia adalah …",
+o:["Sehat","Mudah bernapas","Gangguan pernapasan","Tubuh kuat"],a:2}
+];
+
+let i=0,score=0,time=30,timer,lock=false;
+
+function load(){
+lock=false;
+document.getElementById("question").innerText=questions[i].q;
+questions[i].o.forEach((v,x)=>{
+let el=document.getElementById("o"+x);
+el.innerText=v;
+el.classList.remove("correct","wrong");
+});
+document.getElementById("progress").innerText=(i+1)+" / 40";
+resetTimer();
+}
+
+function jawab(x){
+if(lock) return;
+lock=true;
+
+if(x===questions[i].a){
+document.getElementById("o"+x).classList.add("correct");
+score+=10;
+document.getElementById("score").innerText=score;
+document.getElementById("benar").play();
+jatuh();
+}else{
+document.getElementById("o"+x).classList.add("wrong");
+document.getElementById("o"+questions[i].a).classList.add("correct");
+document.getElementById("salah").play();
+}
+clearInterval(timer);
+}
+
+function jatuh(){
+let coin=document.createElement("div");
+coin.className="coin";
+coin.innerText="🪙";
+coin.style.left=Math.random()*90+"%";
+document.body.appendChild(coin);
+setTimeout(()=>coin.remove(),1200);
+}
+
+function next(){ if(i<39){i++;load()} else alert("🎉 KUIS SELESAI!\nSkor: "+score); }
+function prev(){ if(i>0){i--;load()} }
+
+function resetTimer(){
+clearInterval(timer);
+time=30;
+document.getElementById("time").innerText=time;
+timer=setInterval(()=>{
+time--;
+document.getElementById("time").innerText=time;
+if(time===0){lock=true;next();}
+},1000);
+}
+
+load();
+</script>
+
+</body>
+</html>
